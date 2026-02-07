@@ -1,0 +1,253 @@
+# ML Pipeline Template — Production-Ready Machine Learning System
+
+A modular, domain-agnostic ML pipeline. Train on mock data to learn the full ML lifecycle, then adapt to any classification domain.
+
+---
+
+## What Is This?
+
+A complete machine learning system covering data ingestion, preprocessing, feature engineering, model training, evaluation, and inference. Designed for students and developers to learn ML pipelines end-to-end, then fork and adapt to real projects.
+
+### Key Features
+
+- **3-Model Ensemble Classifier** (RandomForest + CatBoost + GradientBoosting) with 5-fold stratified cross-validation
+- **~28 Engineered Features** extracted automatically from structured data
+- **Three-Model Architecture**: Classifier, priority predictor, and pattern detector
+- **Database-Agnostic**: SQLAlchemy backend supports SQLite, PostgreSQL, MySQL, SQL Server — swap connection strings, no code changes
+- **Mock Data Generator**: Built-in synthetic data for learning and testing the pipeline end-to-end
+- **Production API**: FastAPI server for real-time inference
+- **CLI Tools**: Command-line interface for training, evaluation, and analysis
+
+---
+
+## Quick Start (Windows PowerShell)
+
+### Prerequisites
+
+- **Python 3.10+** — Download from [python.org](https://www.python.org/downloads/)
+  - During install, check **"Add Python to PATH"**
+- **Git** (optional) — Download from [git-scm.com](https://git-scm.com/download/win)
+
+### Clone & Install
+
+Open PowerShell and run:
+
+```powershell
+# Clone the repo (or download ZIP and extract)
+git clone https://github.com/mansredfire/ml-pipeline-template.git
+cd ml-pipeline-template
+
+# Allow scripts to run (one-time)
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+# Create and activate virtual environment
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+
+# Set Python path so imports work
+$env:PYTHONPATH = "$(Get-Location)"
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+### Verify Installation
+
+```powershell
+python -c "from src.collectors import DataRecord; print('Installation successful')"
+```
+
+### Train with Mock Data
+
+```powershell
+python scripts/train_with_mock_data.py --quick --reports 1000
+```
+
+---
+
+## Quick Start (Mac / Linux)
+
+```bash
+git clone https://github.com/mansredfire/ml-pipeline-template.git
+cd ml-pipeline-template
+python3 -m venv venv
+source venv/bin/activate
+export PYTHONPATH="$(pwd)"
+pip install -r requirements.txt
+python scripts/train_with_mock_data.py --quick --reports 1000
+```
+
+---
+
+## Usage
+
+All commands assume your virtual environment is activated and you're in the project directory.
+
+### Train with Mock Data
+
+```powershell
+python scripts/train_with_mock_data.py --quick --reports 1000
+```
+
+The mock data generator creates synthetic records with randomized types (10 simple stock event categories), severities, and metadata. This exercises the full pipeline without needing real data.
+
+### Train from Config
+
+```powershell
+python scripts/train_model.py --config config/training_config.yaml
+```
+
+### Analyze a Target
+
+```powershell
+python scripts/analyze_target.py --domain AAPL --tech Bloomberg Refinitiv
+```
+
+### Batch Analyze
+
+```powershell
+python scripts/batch_analyze.py --input targets.csv --output results.json
+```
+
+### Evaluate Models
+
+```powershell
+python scripts/evaluate_models.py --models-dir data/models
+```
+
+### Run the API Server
+
+```powershell
+python app.py
+# API at http://localhost:8000
+# Docs at http://localhost:8000/docs
+```
+
+---
+
+## How the Pipeline Works
+
+```
+Mock Data / Your Data
+        │
+        ▼
+   Preprocessing
+   (normalize, deduplicate, enrich)
+        │
+        ▼
+   Feature Engineering
+   (~28 features extracted per record)
+        │
+        ▼
+   Model Training
+   (3-model ensemble + 5-fold cross-validation)
+        │
+        ▼
+   Evaluation
+   (accuracy + F1 on held-out test set, CV scores)
+        │
+        ▼
+   Saved Models (.pkl files)
+        │
+        ▼
+   Inference via API or CLI
+```
+
+### Three Models
+
+| Model | What It Does | How It Works |
+|---|---|---|
+| **Classifier** | Predicts event type (like "Stock Goes Up" or "Bad Forecast") | 3-model ensemble: RandomForest, CatBoost, GradientBoosting with 5-fold stratified CV |
+| **Priority Predictor** | Predicts severity/priority level | RandomForest with stratified CV and label encoding |
+| **Pattern Detector** | Finds multi-step patterns across records | Rule-based pattern matching (no ML) |
+
+### What the Feature Engineer Extracts (~28 features)
+
+Severity score, priority score, reward amount, source quality, auth required, user interaction, complexity flags, HTTP method encoding, tech stack count, description length, risk score, and more. See `src/features/feature_engineer.py` for the full list.
+
+---
+
+## Project Structure
+
+```
+ml-pipeline-template/
+├── config/
+│   ├── training_config.yaml      # Training hyperparameters
+│   └── inference_config.yaml     # API and prediction settings
+├── data/
+│   └── models/                   # Trained .pkl files
+├── docs/
+│   ├── Training.md               # How to train models
+│   ├── Scripts.md                # All scripts with arguments
+│   └── Databases.md              # Database setup guide
+├── scripts/
+│   ├── train_with_mock_data.py   # Generate mock data + train (start here)
+│   ├── test_with_mock_data.py    # Generate + display mock data
+│   ├── train_model.py            # Train from config file
+│   ├── analyze_target.py         # Analyze a single target
+│   ├── batch_analyze.py          # Analyze multiple targets
+│   └── evaluate_models.py        # Evaluate model performance
+├── src/
+│   ├── collectors/
+│   │   └── data_sources.py       # DataRecord dataclass + RecordType enum
+│   ├── preprocessing/
+│   │   ├── normalizer.py
+│   │   ├── deduplicator.py
+│   │   └── enricher.py
+│   ├── features/
+│   │   └── feature_engineer.py   # ~28 features
+│   ├── models/
+│   │   ├── classifier.py         # 3-model ensemble classifier
+│   │   ├── priority_predictor.py
+│   │   └── pattern_detector.py
+│   ├── training/
+│   │   └── pipeline.py           # Full training pipeline
+│   └── inference/
+│       └── predictor.py
+├── app.py                         # FastAPI server
+├── main.py                        # CLI
+├── INSTALL.md                     # Installation guide
+├── requirements.txt
+├── setup.py
+└── docker/
+    ├── dockerfile
+    └── docker-compose.yml
+```
+
+---
+
+## Adapting to Your Domain
+
+This template is designed to be forked. To adapt it:
+
+1. **Define your categories** — Edit `RecordType` enum in `src/collectors/data_sources.py`
+2. **Update DataRecord fields** — Add/remove fields relevant to your domain
+3. **Provide training data** — Labeled examples as DataRecord objects
+4. **Tune features** — Edit `src/features/feature_engineer.py` for domain-specific features
+5. **Train and evaluate** — `python scripts/train_with_mock_data.py --reports 1000`
+
+The mock data currently generates generic typed records (10 simple stock event categories). Replace these with your own domain categories.
+
+---
+
+## Documentation
+
+| Doc | What It Covers |
+|---|---|
+| **[INSTALL.md](INSTALL.md)** | Installation on Windows, Linux, macOS |
+| **[docs/Training.md](docs/Training.md)** | Training guide, data requirements, accuracy expectations |
+| **[docs/Scripts.md](docs/Scripts.md)** | All 6 scripts with arguments and workflows |
+| **[docs/Databases.md](docs/Databases.md)** | SQLite, PostgreSQL, MySQL, SQL Server setup |
+
+---
+
+## Troubleshooting
+
+| Problem | Fix |
+|---|---|
+| `ModuleNotFoundError: No module named 'src'` | Run `$env:PYTHONPATH = "$(Get-Location)"` |
+| "python is not recognized" | Install Python from python.org, check **Add to PATH** |
+| Virtual environment won't activate | Run `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser` |
+| Models not found | Train first: `python scripts/train_with_mock_data.py --quick --reports 1000` |
+| Out of memory | Use `--quick` flag or reduce `--reports` count |
+| pip install fails | Try: `python -m pip install -r requirements.txt` |

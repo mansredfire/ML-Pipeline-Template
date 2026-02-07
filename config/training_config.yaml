@@ -1,0 +1,83 @@
+# ML Pipeline Template Training Configuration
+
+# Data Collection
+data_collection:
+  # Mock data (default for testing)
+  use_mock_data: true
+  mock_report_count: 1000
+  
+  # Limits for training/validation
+  train_limit: 10000
+  validation_limit: 2000
+
+# Data Preprocessing
+preprocessing:
+  remove_duplicates: true
+  normalize_text: true
+  fill_missing_values: true
+  outlier_detection: true
+  min_report_quality: 0.5
+
+# Feature Engineering
+features:
+  use_tech_embeddings: true
+  embedding_dim: 50
+  text_vectorization: "tfidf"
+  max_features: 10000
+  ngram_range: [1, 2]
+  include_temporal: true
+  create_interactions: true
+
+# Model Training
+training:
+  test_size: 0.2
+  validation_size: 0.1
+  random_state: 42
+  stratify: true
+  
+  # Models trained by the classifier (actual implementation)
+  models:
+    - random_forest
+    - catboost
+    - gradient_boosting
+  
+  # Hyperparameters
+  hyperparameters:
+    random_forest:
+      n_estimators: 200
+      max_depth: 15
+      min_samples_split: 5
+      min_samples_leaf: 2
+      class_weight: "balanced"
+    
+    catboost:
+      iterations: 200
+      depth: 10
+      learning_rate: 0.1
+    
+    gradient_boosting:
+      n_estimators: 200
+      max_depth: 10
+      learning_rate: 0.1
+      subsample: 0.8
+  
+  # Ensemble
+  ensemble_method: "averaging"  # voting, averaging, weighted
+  
+  # Cross-validation
+  cross_validation:
+    enabled: true
+    n_splits: 5
+    scoring: "f1_weighted"
+
+# Output
+output:
+  models_dir: "data/models"
+  save_feature_importance: true
+  save_confusion_matrix: true
+  save_classification_report: true
+
+# Logging
+logging:
+  level: "INFO"
+  file: "training.log"

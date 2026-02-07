@@ -1,0 +1,44 @@
+# ML Pipeline Template Inference Configuration
+
+# Models
+models:
+  dir: "data/models"
+  classifier: "classifier.pkl"
+  priority_predictor: "priority_predictor.pkl"
+  pattern_detector: "pattern_detector.pkl"
+  feature_engineer: "feature_engineer.pkl"
+
+# Prediction
+prediction:
+  min_probability: 0.1
+  ensemble_method: "averaging"
+  top_n: 10
+  confidence_thresholds:
+    very_high: 0.8
+    high: 0.6
+    medium: 0.4
+    low: 0.0
+
+# Pattern Detection
+patterns:
+  enabled: true
+  min_chain_probability: 0.3
+
+# API
+api:
+  host: "0.0.0.0"
+  port: 8000
+  workers: 4
+  reload: false
+  log_level: "info"
+
+# Caching
+cache:
+  enabled: true
+  ttl: 3600
+  max_size: 1000
+
+# Logging
+logging:
+  level: "INFO"
+  file: "inference.log"

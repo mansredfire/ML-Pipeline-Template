@@ -1,0 +1,33 @@
+# Core ML
+numpy>=1.21.0
+pandas>=1.3.0
+scikit-learn>=1.0.0
+scipy>=1.7.0
+
+# Ensemble Models (all used by the classifier)
+xgboost>=1.5.0
+lightgbm>=3.3.0
+catboost>=1.0.0
+
+# Pattern Detection
+networkx>=2.6.0
+
+# API
+fastapi>=0.70.0
+uvicorn[standard]>=0.15.0
+pydantic>=1.8.0
+
+# CLI
+click>=8.0.0
+rich>=10.0.0
+
+# Utilities
+pyyaml>=6.0
+tqdm>=4.62.0
+joblib>=1.1.0
+loguru>=0.5.3
+
+# Database (SQLAlchemy for database-agnostic support)
+# SQLite works out of the box — no extra install needed
+# For PostgreSQL: pip install psycopg2-binary
+# For MySQL: pip install pymysql
