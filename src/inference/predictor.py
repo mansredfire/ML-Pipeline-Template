@@ -270,7 +270,8 @@ class Predictor:
         if self.models.get('classifier'):
             try:
                 model = self.models['classifier']
-                probabilities = model.predict_proba(X)
+                X_pred = X.drop(columns=['record_type_encoded'], errors='ignore')
+                probabilities = model.predict_proba(X_pred)
                 
                 label_encoder = self.models.get('label_encoder')
                 
