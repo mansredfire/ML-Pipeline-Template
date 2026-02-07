@@ -1,6 +1,6 @@
 # ML Pipeline Template — Production-Ready Machine Learning System
 
-A modular, domain-agnostic ML pipeline. Train on mock data to learn the full ML lifecycle, then adapt to any classification domain.
+A modular, domain-agnostic ML pipeline. Trains on mock/raw data to learn the full ML lifecycle, then adapt to any classification domain.
 
 ---
 
