@@ -1,0 +1,194 @@
+# ML Pipeline Template — Patch Update List
+
+Reference list for future updates. Organized by priority.
+
+---
+
+## PATCH 1: Fix the Ensemble (Critical)
+
+**Problem:** README says "3-model ensemble" but the models don't actually work together. They train separately and the classifier just uses one.
+
+- [ ] Implement real ensemble voting (average predictions from all 3 models)
+- [ ] Add option for soft voting (average probabilities) vs hard voting (majority class)
+- [ ] Consider stacking: train a meta-model on top of the 3 base model outputs
+- [ ] Make sure `analyze_target.py` output reflects the combined prediction
+
+---
+
+## PATCH 2: Hyperparameter Tuning
+
+**Problem:** All 3 models run with default parameters. No evidence of deliberate choices.
+
+- [ ] Add `RandomizedSearchCV` or `GridSearchCV` step before final training
+- [ ] Tune at minimum: `n_estimators`, `max_depth`, `learning_rate`
+- [ ] Log best parameters found for each model
+- [ ] Save best params to config or model metadata so they're reproducible
+- [ ] Use CV scores to pick the best hyperparameters (not just print them)
+
+---
+
+## PATCH 3: Model Evaluation Improvements
+
+**Problem:** Training only prints accuracy and F1. No deeper analysis.
+
+- [ ] Add confusion matrix output after training
+- [ ] Add full classification report (precision, recall, F1 per class)
+- [ ] Add baseline comparison — train a DummyClassifier and show the ensemble beats it
+- [ ] Add feature importance ranking (which of the 28 features actually matter?)
+- [ ] Drop low-importance features and retrain to show improvement
+- [ ] Save evaluation results to a JSON or CSV file for comparison across runs
+
+---
+
+## PATCH 4: Data Pipeline Layer
+
+**Problem:** Data goes straight from generator to training with no staging or versioning.
+
+- [ ] Create folder structure: `data/raw/` → `data/staging/` → `data/processed/`
+- [ ] Add a manifest file that tracks what data has been processed (filename, record count, date, hash)
+- [ ] Raw data lands in `raw/`, gets validated, moves to `staging/`, gets cleaned, moves to `processed/`
+- [ ] Training only reads from `processed/`
+- [ ] Add a `pipeline_status.json` or similar that shows current state
+
+---
+
+## PATCH 5: Data Validation
+
+**Problem:** Garbage in, garbage out. No checks before training.
+
+- [ ] Add validation function that runs before training starts
+- [ ] Check for: missing required fields, unexpected values, empty strings, null scores
+- [ ] Check for class imbalance — warn if any event type is <5% or >50% of data
+- [ ] Check for schema drift — incoming data columns match what the model expects
+- [ ] Reject or quarantine invalid records instead of silently training on them
+
+---
+
+## PATCH 6: Model Versioning & Experiment Tracking
+
+**Problem:** Retraining overwrites old models. No history of what was tried.
+
+- [ ] Save models to versioned folders: `data/models/v1/`, `data/models/v2/`, etc.
+- [ ] Create a run log (SQLite table or JSON file) that records per run:
+  - Timestamp
+  - Record count used
+  - Hyperparameters
+  - Accuracy, F1, CV scores for each model
+  - Path to saved `.pkl` files
+- [ ] Add a `--tag` argument to training scripts for naming runs
+- [ ] Track which model version is currently "live" for the API
+
+---
+
+## PATCH 7: Unit Tests
+
+**Problem:** Zero tests. Project reads as a personal experiment without them.
+
+- [ ] Create `tests/` directory with pytest
+- [ ] `test_feature_engineer.py` — does transform produce 28 features? handles empty input?
+- [ ] `test_classifier.py` — does it return valid predictions? right number of classes?
+- [ ] `test_predictor.py` — does analyze_target return expected keys?
+- [ ] `test_api.py` — does the API return 200? handle bad input with proper error codes?
+- [ ] `test_data_validation.py` — does validation catch missing fields? imbalanced data?
+- [ ] Target: 10-15 tests covering core paths
+- [ ] Add to README: `pytest tests/` as a verification step
+
+---
+
+## PATCH 8: Feedback Loop
+
+**Problem:** Predictions go out but there's no way to know if they were right.
+
+- [ ] Add API endpoint: `POST /feedback` — accepts prediction ID + correct/incorrect label
+- [ ] Store feedback in a SQLite table or JSON log
+- [ ] Add script: `scripts/incorporate_feedback.py` — merges labeled predictions back into training data
+- [ ] Next training run uses feedback-corrected data automatically
+- [ ] Track feedback coverage: what % of predictions have been labeled?
+
+---
+
+## PATCH 9: Prediction Monitoring
+
+**Problem:** No visibility into what the model is doing in production.
+
+- [ ] Log every API prediction: timestamp, input features, predicted class, confidence, response time
+- [ ] Save logs to `data/logs/predictions.jsonl` (one JSON object per line)
+- [ ] Add script: `scripts/monitor_drift.py` that reads logs and reports:
+  - Prediction distribution over time (is one class dominating?)
+  - Average confidence trending down?
+  - Input feature distributions shifting?
+- [ ] Add alerting thresholds (e.g. warn if >70% of predictions are the same class)
+
+---
+
+## PATCH 10: Incremental Training
+
+**Problem:** Every retrain starts from scratch.
+
+- [ ] Add `--append` flag to training scripts — adds new data to existing training set
+- [ ] Store training data path in model metadata so you know what it was trained on
+- [ ] Add `--warm-start` option that initializes models from previous weights (sklearn supports this for RF and GB)
+- [ ] Track cumulative record count across training runs
+
+---
+
+## PATCH 11: Logging & Error Handling
+
+**Problem:** Mix of loguru and print statements. No log files. API returns raw tracebacks.
+
+- [ ] Route all logs to a file: `data/logs/pipeline.log`
+- [ ] Use structured logging (JSON format) so logs are parseable
+- [ ] Remove bare `print()` statements — replace with logger calls
+- [ ] Add proper FastAPI error handlers:
+  - 400 for malformed input (with clear message)
+  - 404 for models not found
+  - 500 with sanitized error (no Python tracebacks to users)
+
+---
+
+## PATCH 12: Configuration Management
+
+**Problem:** Config files exist but half the settings are decorative.
+
+- [ ] Audit every value in `training_config.yaml` — does changing it actually change behavior?
+- [ ] Wire up disconnected settings to actual code
+- [ ] Remove settings that don't do anything
+- [ ] Add config validation — fail fast if config has invalid values
+- [ ] Support environment variable overrides for sensitive settings
+
+---
+
+## PATCH 13: Dockerfile
+
+**Problem:** No containerization despite references to a docker/ directory.
+
+- [ ] Create `Dockerfile` that installs dependencies and runs the API
+- [ ] Create `docker-compose.yml` if using a database
+- [ ] Add `.dockerignore` (exclude venv, data/models, __pycache__)
+- [ ] Document in README: `docker build` and `docker run` commands
+- [ ] Test that training and inference both work inside the container
+
+---
+
+## PATCH 14: Type Hints & Docstrings Cleanup
+
+**Problem:** Inconsistent across the codebase.
+
+- [ ] Add type hints to all function signatures
+- [ ] Add docstrings to all public methods
+- [ ] Run `mypy` and fix any type errors
+- [ ] Consistent docstring format (Google style or NumPy style, pick one)
+
+---
+
+## Suggested Order
+
+| Phase | Patches | Time Estimate |
+|-------|---------|---------------|
+| **Phase 1 — Fix what's broken** | 1, 2, 3 | 3-5 days |
+| **Phase 2 — Production basics** | 7, 11, 12 | 3-4 days |
+| **Phase 3 — Data pipeline** | 4, 5, 6 | 4-5 days |
+| **Phase 4 — ML lifecycle** | 8, 9, 10 | 4-5 days |
+| **Phase 5 — Polish** | 13, 14 | 2-3 days |
+
+Total: ~3-4 weeks at focused pace.
