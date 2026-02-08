@@ -18,6 +18,20 @@ A complete machine learning system covering data ingestion, preprocessing, featu
 - **Production API**: FastAPI server for real-time inference
 - **CLI Tools**: Command-line interface for training, evaluation, and analysis
 
+
+|---|---|
+| Python + ecosystem (Pandas, NumPy, Scikit-learn) | ✅ Yes |
+| ML frameworks (XGBoost, LightGBM, CatBoost, RF) | ✅ Yes — 5-algorithm ensemble |
+| Feature engineering | ✅ Yes — 28 auto-extracted features |
+| Cross-validation & model evaluation | ✅ Yes — 5-fold stratified CV |
+| Data ingestion (CSV, JSON, SQL databases) | ✅ Yes — SQLAlchemy multi-DB |
+| REST API for inference | ✅ Yes — FastAPI |
+| Docker & CI/CD | ✅ Yes — Docker + GitHub Actions |
+| End-to-end pipeline ownership | ✅ Yes — ingestion through serving |
+| Cloud platform experience | ⚠️ Gap — data pipeline extension (Spark/Delta Lake/Airflow) will help |
+| Deep learning / PyTorch / TensorFlow | ⚠️ Gap — template uses classical ML, not neural networks |
+| LLMs / GenAI / Transformers | ⚠️ Gap — not covered yet |
+| Kubernetes / MLflow | ⚠️ Gap — not in template currently |
 ---
 
 ## Quick Start (Windows PowerShell)
